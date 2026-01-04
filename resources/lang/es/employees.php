@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Gestión de Empleados',
+    'new_employee' => 'Nuevo Empleado',
+    'create_title' => 'Crear Nuevo Empleado',
+    'create_description' => 'Complete el formulario para registrar un nuevo empleado en el sistema.',
+    'edit_title' => 'Editar Empleado',
+    'edit_description' => 'Actualice la información del empleado.',
+    'show_title' => 'Detalle de Empleado',
+    'employee_id' => 'Employee ID',
+    'department' => 'Departamento',
+    'position' => 'Posición',
+    'hire_date' => 'Fecha de Contratación',
+    'password' => 'Contraseña',
+    'password_min' => 'Mínimo 8 caracteres',
+    'password_optional' => 'Dejar vacío para mantener el password actual. Mínimo 8 caracteres si se cambia.',
+    'employee_id_placeholder' => 'ID único del empleado en la empresa',
+    'created_successfully' => 'Empleado creado exitosamente.',
+    'updated_successfully' => 'Empleado actualizado exitosamente.',
+    'deleted_successfully' => 'Empleado dado de baja exitosamente.',
+    'delete_confirm' => '¿Está seguro de dar de baja a este empleado?',
+    'no_employees' => 'No hay empleados registrados.',
+    'registration_date' => 'Fecha de Registro',
+    'last_update' => 'Última Actualización',
+    'role' => 'Rol',
+];

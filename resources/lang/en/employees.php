@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Employee Management',
+    'new_employee' => 'New Employee',
+    'create_title' => 'Create New Employee',
+    'create_description' => 'Complete the form to register a new employee in the system.',
+    'edit_title' => 'Edit Employee',
+    'edit_description' => 'Update employee information.',
+    'show_title' => 'Employee Details',
+    'employee_id' => 'Employee ID',
+    'department' => 'Department',
+    'position' => 'Position',
+    'hire_date' => 'Hire Date',
+    'password' => 'Password',
+    'password_min' => 'Minimum 8 characters',
+    'password_optional' => 'Leave empty to keep current password. Minimum 8 characters if changed.',
+    'employee_id_placeholder' => 'Unique employee ID in the company',
+    'created_successfully' => 'Employee created successfully.',
+    'updated_successfully' => 'Employee updated successfully.',
+    'deleted_successfully' => 'Employee deactivated successfully.',
+    'delete_confirm' => 'Are you sure you want to deactivate this employee?',
+    'no_employees' => 'No employees registered.',
+    'registration_date' => 'Registration Date',
+    'last_update' => 'Last Update',
+    'role' => 'Role',
+];

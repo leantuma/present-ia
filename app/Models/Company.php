@@ -18,6 +18,7 @@ class Company extends Model
         'address',
         'logo',
         'is_active',
+        'language',
         'settings',
         'qr_token',
         'qr_token_expires_at',
@@ -112,6 +113,14 @@ class Company extends Model
     }
 
     /**
+     * Get all leaves for this company
+     */
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    /**
      * Check if QR login is enabled
      */
     public function isQrLoginEnabled(): bool
@@ -125,5 +134,13 @@ class Company extends Model
     public function isGeolocationRequired(): bool
     {
         return $this->geolocation_required ?? false;
+    }
+
+    /**
+     * Get the language for this company
+     */
+    public function getLanguage(): string
+    {
+        return $this->language ?? 'es';
     }
 }

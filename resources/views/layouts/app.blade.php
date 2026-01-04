@@ -37,34 +37,37 @@
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                         <a href="{{ route('dashboard') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Dashboard
+                            {{ __('dashboard.title') }}
                         </a>
                         <a href="{{ route('check-in') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Check In/Out
+                            {{ __('attendance.check_in') }}/{{ __('attendance.check_out') }}
                         </a>
                         @if(auth()->user()->isSuperAdmin())
                         <a href="{{ route('companies.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Companies
+                            {{ __('companies.title') }}
                         </a>
                         @endif
                         @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
                         <a href="{{ route('schedules') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Schedules
+                            {{ __('common.schedules') }}
                         </a>
                         <a href="{{ route('reports') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Reports
+                            {{ __('common.reports') }}
                         </a>
                         <a href="{{ route('employees.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Employees
+                            {{ __('employees.title') }}
                         </a>
                         @endif
+                        <a href="{{ route('leaves.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            {{ __('leaves.title') }}
+                        </a>
                     </div>
                 </div>
                 <div class="flex items-center">
                     <span class="text-sm text-gray-700 mr-4">{{ auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">Logout</button>
+                        <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">{{ __('auth.logout') }}</button>
                     </form>
                 </div>
             </div>

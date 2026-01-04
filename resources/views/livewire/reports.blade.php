@@ -1,22 +1,22 @@
 <div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Attendance Reports</h1>
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ __('reports.title') }}</h1>
 
     <!-- Filters -->
     <div class="bg-white shadow rounded-lg p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('reports.start_date') }}</label>
                 <input type="date" wire:model="startDate" class="block w-full rounded-md border-gray-300 shadow-sm">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('reports.end_date') }}</label>
                 <input type="date" wire:model="endDate" class="block w-full rounded-md border-gray-300 shadow-sm">
             </div>
             @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Employee</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('reports.employee') }}</label>
                 <select wire:model="selectedUserId" class="block w-full rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Employees</option>
+                    <option value="">{{ __('reports.all_employees') }}</option>
                     @foreach($users as $user)
                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
@@ -25,7 +25,7 @@
             @endif
             <div class="flex items-end">
                 <button wire:click="exportExcel" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Export Excel
+                    {{ __('reports.export_excel') }}
                 </button>
             </div>
         </div>
@@ -34,27 +34,27 @@
     <!-- Summary -->
     <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Total Days</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.total_days') }}</h3>
             <p class="text-2xl font-bold text-gray-900 mt-2">{{ $summary['total_days'] ?? 0 }}</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Present</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.present') }}</h3>
             <p class="text-2xl font-bold text-green-600 mt-2">{{ $summary['present'] ?? 0 }}</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Late</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.late') }}</h3>
             <p class="text-2xl font-bold text-yellow-600 mt-2">{{ $summary['late'] ?? 0 }}</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Absent</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.absent') }}</h3>
             <p class="text-2xl font-bold text-red-600 mt-2">{{ $summary['absent'] ?? 0 }}</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Total Hours</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.total_hours') }}</h3>
             <p class="text-2xl font-bold text-gray-900 mt-2">{{ $summary['total_hours'] ?? 0 }}</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500">Avg Late (min)</h3>
+            <h3 class="text-sm font-medium text-gray-500">{{ __('reports.avg_late_min') }}</h3>
             <p class="text-2xl font-bold text-yellow-600 mt-2">{{ $summary['average_minutes_late'] ?? 0 }}</p>
         </div>
     </div>
@@ -64,12 +64,12 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('reports.date') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('reports.employee') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('reports.check_in') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('reports.check_out') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('reports.hours') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.status') }}</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -92,13 +92,19 @@
                             @elseif($attendance->status === 'absent') bg-red-100 text-red-800
                             @else bg-green-100 text-green-800
                             @endif">
-                            {{ ucfirst($attendance->status) }}
+                            @if($attendance->status === 'late')
+                                {{ __('reports.late') }}
+                            @elseif($attendance->status === 'absent')
+                                {{ __('reports.absent') }}
+                            @else
+                                {{ __('reports.present') }}
+                            @endif
                         </span>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No attendance records found</td>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">{{ __('reports.no_records') }}</td>
                 </tr>
                 @endforelse
             </tbody>

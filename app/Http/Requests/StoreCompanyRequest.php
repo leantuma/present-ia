@@ -28,6 +28,7 @@ class StoreCompanyRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
+            'language' => ['required', 'in:es,en'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
