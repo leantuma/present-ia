@@ -33,4 +33,5 @@ return [
     'optional' => 'Optional',
     'schedules' => 'Schedules',
     'reports' => 'Reports',
+    'access_denied' => 'Access denied',
 ];

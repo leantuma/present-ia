@@ -79,5 +79,60 @@
             </dl>
         </div>
     </div>
+
+    <!-- Administrators Section -->
+    <div class="mt-6 bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900">{{ __('admins.title') }}</h2>
+            <a href="{{ route('companies.admins.create', $company) }}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+                {{ __('admins.new_admin') }}
+            </a>
+        </div>
+
+        <div class="px-6 py-4">
+            @php
+                $admins = \App\Models\User::where('company_id', $company->id)
+                    ->where('role', 'admin')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            @endphp
+
+            @if($admins->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.name') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.email') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admins.registration_date') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($admins as $admin)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $admin->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $admin->email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $admin->created_at->format('d/m/Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('admins.edit', $admin) }}" class="text-blue-600 hover:text-blue-900">{{ __('common.edit') }}</a>
+                                    <form action="{{ route('admins.destroy', $admin) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('admins.delete_confirm') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">{{ __('common.delete') }}</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <p class="text-sm text-gray-500 text-center py-4">{{ __('admins.no_admins') }}</p>
+            @endif
+        </div>
+    </div>
 </div>
 @endsection

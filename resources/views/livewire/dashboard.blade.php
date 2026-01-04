@@ -1,8 +1,74 @@
 <div>
     <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ __('dashboard.title') }}</h1>
 
-    <!-- Today's Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    @if(auth()->user() && auth()->user()->isSuperAdmin())
+        <!-- Superadmin Dashboard -->
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">{{ __('dashboard.total_companies') }}</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-2">{{ $superadminStats['total_companies'] ?? 0 }}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">{{ __('dashboard.active_companies') }}</h3>
+                <p class="text-2xl font-bold text-green-600 mt-2">{{ $superadminStats['active_companies'] ?? 0 }}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">{{ __('dashboard.inactive_companies') }}</h3>
+                <p class="text-2xl font-bold text-red-600 mt-2">{{ $superadminStats['inactive_companies'] ?? 0 }}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">{{ __('dashboard.total_employees') }}</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-2">{{ $superadminStats['total_employees'] ?? 0 }}</p>
+            </div>
+        </div>
+
+        <!-- Companies List -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.companies_list') }}</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.name') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.status') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('dashboard.employees_count') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('companies.creation_date') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($companiesList as $company)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $company['name'] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($company['is_active'])
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ __('common.active') }}</span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">{{ __('common.inactive') }}</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $company['employees_count'] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ \Carbon\Carbon::parse($company['created_at'])->format('d/m/Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ route('companies.show', $company['id']) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('common.view') }}</a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">{{ __('companies.no_companies') }}</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @else
+        <!-- Regular Dashboard (Admin, Supervisor, Employee) -->
+        <!-- Today's Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-sm font-medium text-gray-500">{{ __('dashboard.total_employees') }}</h3>
             <p class="text-2xl font-bold text-gray-900 mt-2">{{ $todayStats['total_employees'] ?? 0 }}</p>
@@ -255,6 +321,7 @@
             </div>
         </div>
     </div>
+    @endif
     @endif
 </div>
 

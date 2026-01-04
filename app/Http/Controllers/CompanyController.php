@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\User;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Http\Requests\StoreAdminRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class CompanyController extends Controller
 {
@@ -122,5 +125,54 @@ class CompanyController extends Controller
         
         return redirect()->route('companies.index')
             ->with('message', __('companies.deleted_successfully'));
+    }
+
+    /**
+     * List admins for a company
+     */
+    public function admins(Company $company)
+    {
+        $this->authorize('view', $company);
+        
+        $admins = User::where('company_id', $company->id)
+            ->where('role', 'admin')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('companies.admins', compact('company', 'admins'));
+    }
+
+    /**
+     * Show form to create admin for a company
+     */
+    public function createAdmin(Company $company)
+    {
+        $this->authorize('view', $company);
+        
+        return view('companies.create-admin', compact('company'));
+    }
+
+    /**
+     * Store admin for a company
+     */
+    public function storeAdmin(StoreAdminRequest $request, Company $company)
+    {
+        $this->authorize('view', $company);
+        
+        $data = $request->validated();
+        
+        // Ensure company_id matches the route company
+        $data['company_id'] = $company->id;
+        
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'company_id' => $data['company_id'],
+            'role' => 'admin',
+        ]);
+        
+        return redirect()->route('companies.show', $company)
+            ->with('message', __('admins.created_successfully'));
     }
 }
