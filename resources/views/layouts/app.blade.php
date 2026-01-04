@@ -42,12 +42,20 @@
                         <a href="{{ route('check-in') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Check In/Out
                         </a>
+                        @if(auth()->user()->isSuperAdmin())
+                        <a href="{{ route('companies.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Companies
+                        </a>
+                        @endif
                         @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
                         <a href="{{ route('schedules') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Schedules
                         </a>
                         <a href="{{ route('reports') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Reports
+                        </a>
+                        <a href="{{ route('employees.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Employees
                         </a>
                         @endif
                     </div>

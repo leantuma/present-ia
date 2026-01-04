@@ -42,4 +42,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports', function () {
         return view('reports');
     })->name('reports');
+    
+    // Company management routes (only for superadmin)
+    Route::middleware('can:viewAny,App\Models\Company')->group(function () {
+        Route::resource('companies', \App\Http\Controllers\CompanyController::class);
+    });
+    
+    // Employee management routes (only for admin and supervisor)
+    Route::middleware('can:viewAny,App\Models\User')->group(function () {
+        Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
+    });
 });
