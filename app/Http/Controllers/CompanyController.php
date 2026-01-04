@@ -59,7 +59,7 @@ class CompanyController extends Controller
         Company::create($data);
         
         return redirect()->route('companies.index')
-            ->with('message', 'Empresa creada exitosamente.');
+            ->with('message', __('companies.created_successfully'));
     }
 
     /**
@@ -108,7 +108,7 @@ class CompanyController extends Controller
         $company->update($data);
         
         return redirect()->route('companies.index')
-            ->with('message', 'Empresa actualizada exitosamente.');
+            ->with('message', __('companies.updated_successfully'));
     }
 
     /**
@@ -121,6 +121,6 @@ class CompanyController extends Controller
         $company->delete();
         
         return redirect()->route('companies.index')
-            ->with('message', 'Empresa eliminada exitosamente.');
+            ->with('message', __('companies.deleted_successfully'));
     }
 }

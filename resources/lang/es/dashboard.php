@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Dashboard',
+    'total_employees' => 'Total Empleados',
+    'checked_in' => 'Registrados',
+    'late' => 'Tarde',
+    'absent' => 'Ausente',
+    'recent_alerts' => 'Alertas Recientes',
+    'recent_attendances' => 'Asistencias Recientes',
+    'weekly_summary' => 'Resumen Semanal',
+    'check_ins' => 'Registros',
+    'hours_worked' => 'Horas Trabajadas',
+    'no_alerts' => 'No hay alertas',
+    'no_recent_attendances' => 'No hay asistencias recientes',
+    'weekly_calendar' => 'Calendario Semanal',
+    'previous_week' => 'Semana Anterior',
+    'current_week' => 'Semana Actual',
+    'next_week' => 'Semana Siguiente',
+    'week' => 'Semana',
+    'present' => 'Presente',
+    'on_leave' => 'En Licencia',
+    'entry' => 'Entrada',
+    'exit' => 'Salida',
+    'legend' => 'Leyenda',
+    'no_employees' => 'No hay empleados registrados',
+];

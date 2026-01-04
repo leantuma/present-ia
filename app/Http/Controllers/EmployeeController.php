@@ -69,7 +69,7 @@ class EmployeeController extends Controller
         });
         
         return redirect()->route('employees.index')
-            ->with('message', 'Empleado creado exitosamente.');
+            ->with('message', __('employees.created_successfully'));
     }
 
     /**
@@ -133,7 +133,7 @@ class EmployeeController extends Controller
         });
         
         return redirect()->route('employees.index')
-            ->with('message', 'Empleado actualizado exitosamente.');
+            ->with('message', __('employees.updated_successfully'));
     }
 
     /**
@@ -147,6 +147,6 @@ class EmployeeController extends Controller
         $employee->delete();
         
         return redirect()->route('employees.index')
-            ->with('message', 'Empleado dado de baja exitosamente.');
+            ->with('message', __('employees.deleted_successfully'));
     }
 }

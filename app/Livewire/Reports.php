@@ -70,13 +70,13 @@ class Reports extends Component
     public function exportExcel()
     {
         // TODO: Implement Excel export using Laravel Excel or similar
-        return redirect()->back()->with('message', 'Excel export feature coming soon');
+        return redirect()->back()->with('message', __('reports.excel_coming_soon'));
     }
 
     public function exportPdf()
     {
         // TODO: Implement PDF export using DomPDF or similar
-        return redirect()->back()->with('message', 'PDF export feature coming soon');
+        return redirect()->back()->with('message', __('reports.pdf_coming_soon'));
     }
 
     public function render()

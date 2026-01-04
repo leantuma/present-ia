@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Dashboard',
+    'total_employees' => 'Total Employees',
+    'checked_in' => 'Checked In',
+    'late' => 'Late',
+    'absent' => 'Absent',
+    'recent_alerts' => 'Recent Alerts',
+    'recent_attendances' => 'Recent Attendances',
+    'weekly_summary' => 'Weekly Summary',
+    'check_ins' => 'Check Ins',
+    'hours_worked' => 'Hours Worked',
+    'no_alerts' => 'No alerts',
+    'no_recent_attendances' => 'No recent attendances',
+    'weekly_calendar' => 'Weekly Calendar',
+    'previous_week' => 'Previous Week',
+    'current_week' => 'Current Week',
+    'next_week' => 'Next Week',
+    'week' => 'Week',
+    'present' => 'Present',
+    'on_leave' => 'On Leave',
+    'entry' => 'Entry',
+    'exit' => 'Exit',
+    'legend' => 'Legend',
+    'no_employees' => 'No employees registered',
+];

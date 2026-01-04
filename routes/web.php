@@ -52,4 +52,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:viewAny,App\Models\User')->group(function () {
         Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
     });
+    
+    // Leave management routes (for all authenticated users)
+    Route::middleware('can:viewAny,App\Models\Leave')->group(function () {
+        Route::resource('leaves', \App\Http\Controllers\LeaveController::class);
+        Route::post('leaves/{leave}/approve', [\App\Http\Controllers\LeaveController::class, 'approve'])->name('leaves.approve');
+        Route::post('leaves/{leave}/reject', [\App\Http\Controllers\LeaveController::class, 'reject'])->name('leaves.reject');
+    });
 });

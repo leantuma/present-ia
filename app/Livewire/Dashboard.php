@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Attendance;
 use App\Models\Alert;
+use App\Models\Leave;
 use App\Services\AIService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ class Dashboard extends Component
     public $recentAlerts = [];
     public $weeklySummary = [];
     public $recentAttendances = [];
+    public $currentWeekStart;
+    public $weeklyCalendar = [];
 
     protected $aiService;
 
@@ -25,7 +28,14 @@ class Dashboard extends Component
 
     public function mount()
     {
+        // Initialize current week start (Monday of current week)
+        $this->currentWeekStart = Carbon::now()->startOfWeek();
         $this->loadDashboardData();
+        
+        // Load weekly calendar for admin/supervisor
+        if (Auth::user() && (Auth::user()->isAdmin() || Auth::user()->isSupervisor())) {
+            $this->loadWeeklyCalendar();
+        }
     }
 
     public function loadDashboardData()
@@ -125,6 +135,147 @@ class Dashboard extends Component
             $alert->markAsRead();
             $this->loadDashboardData();
         }
+    }
+
+    /**
+     * Load weekly calendar data
+     */
+    public function loadWeeklyCalendar()
+    {
+        $user = Auth::user();
+        
+        // Only for admin and supervisor
+        if (!$user || (!$user->isAdmin() && !$user->isSupervisor())) {
+            $this->weeklyCalendar = [];
+            return;
+        }
+        
+        // Handle superadmin case
+        if ($user->isSuperAdmin() || !$user->company) {
+            $this->weeklyCalendar = [];
+            return;
+        }
+        
+        $company = $user->company;
+        $weekStart = Carbon::parse($this->currentWeekStart)->startOfWeek();
+        $weekEnd = $weekStart->copy()->endOfWeek();
+        
+        // Get all employees
+        $employees = $company->users()
+            ->where('role', 'employee')
+            ->orderBy('name')
+            ->get();
+        
+        // Get all attendances for the week
+        $attendancesCollection = Attendance::where('company_id', $company->id)
+            ->whereBetween('date', [$weekStart, $weekEnd])
+            ->with('user')
+            ->get();
+        
+        // Group attendances by user_id and date for easy lookup
+        $attendances = [];
+        foreach ($attendancesCollection as $attendance) {
+            $key = $attendance->user_id . '_' . $attendance->date->format('Y-m-d');
+            $attendances[$key] = $attendance;
+        }
+        
+        // Get all approved leaves for the week
+        $leavesCollection = Leave::where('company_id', $company->id)
+            ->where('status', 'approved')
+            ->where(function ($query) use ($weekStart, $weekEnd) {
+                $query->whereBetween('start_date', [$weekStart, $weekEnd])
+                    ->orWhereBetween('end_date', [$weekStart, $weekEnd])
+                    ->orWhere(function ($q) use ($weekStart, $weekEnd) {
+                        $q->where('start_date', '<=', $weekStart)
+                          ->where('end_date', '>=', $weekEnd);
+                    });
+            })
+            ->with('user')
+            ->get();
+        
+        // Build calendar structure
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $calendarDays = [];
+        
+        foreach ($days as $index => $dayName) {
+            $currentDate = $weekStart->copy()->addDays($index);
+            $calendarDays[$dayName] = [
+                'date' => $currentDate,
+                'employees' => [],
+            ];
+            
+            foreach ($employees as $employee) {
+                // Check for attendance
+                $attendanceKey = $employee->id . '_' . $currentDate->format('Y-m-d');
+                $attendance = $attendances[$attendanceKey] ?? null;
+                
+                // Check for leave
+                $leave = $leavesCollection->first(function ($l) use ($employee, $currentDate) {
+                    if ($l->user_id !== $employee->id) {
+                        return false;
+                    }
+                    $start = Carbon::parse($l->start_date);
+                    $end = Carbon::parse($l->end_date);
+                    return $currentDate->gte($start) && $currentDate->lte($end);
+                });
+                
+                // Determine status
+                $status = 'absent';
+                $checkIn = null;
+                $checkOut = null;
+                
+                if ($leave) {
+                    $status = 'on_leave';
+                } elseif ($attendance) {
+                    $status = $attendance->status ?? 'present';
+                    $checkIn = $attendance->check_in_at ? $attendance->check_in_at->format('H:i') : null;
+                    $checkOut = $attendance->check_out_at ? $attendance->check_out_at->format('H:i') : null;
+                }
+                
+                $calendarDays[$dayName]['employees'][] = [
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employee->name,
+                    'attendance' => $attendance,
+                    'leave' => $leave,
+                    'status' => $status,
+                    'check_in' => $checkIn,
+                    'check_out' => $checkOut,
+                ];
+            }
+        }
+        
+        $this->weeklyCalendar = [
+            'week_start' => $weekStart,
+            'week_end' => $weekEnd,
+            'days' => $calendarDays,
+        ];
+    }
+
+    /**
+     * Navigate to previous week
+     */
+    public function previousWeek()
+    {
+        $this->currentWeekStart = Carbon::parse($this->currentWeekStart)->subWeek();
+        $this->loadWeeklyCalendar();
+    }
+
+    /**
+     * Navigate to next week
+     */
+    public function nextWeek()
+    {
+        $this->currentWeekStart = Carbon::parse($this->currentWeekStart)->addWeek();
+        $this->loadWeeklyCalendar();
+    }
+
+    /**
+     * Go to current week
+     */
+    public function goToCurrentWeek()
+    {
+        $this->currentWeekStart = Carbon::now()->startOfWeek();
+        $this->loadWeeklyCalendar();
     }
 
     public function render()

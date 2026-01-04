@@ -154,6 +154,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all leaves for this user
+     */
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class, 'user_id');
+    }
+
+    /**
      * Check if user has PIN set
      */
     public function hasPin(): bool
