@@ -1,345 +1,382 @@
-# Present-IA - Employee Attendance Management SaaS
+# Present-IA - SaaS B2B de Control de Asistencia
 
-A production-ready multi-tenant SaaS application for managing employee attendance with AI-powered insights, built with Laravel 10+ and Livewire v3.
+Sistema SaaS multi-tenant escalable para gestión de asistencia de empleados, construido con arquitectura API-first, soporte móvil (PWA) y autenticación dual (email/password y QR dinámico).
 
-## Features
+## 🏗️ Arquitectura
 
-### Core Functionality
-- **Multi-Tenant Architecture**: Each company operates as an isolated tenant
-- **Role-Based Access Control**: Admin, Supervisor, and Employee roles
-- **Check-In/Check-Out System**: 
-  - Photo capture support
-  - Geolocation validation
-  - Device information tracking
-  - Timestamp recording
-
-### Schedule Management
-- Fixed and rotating shift schedules
-- Configurable tolerance for late arrivals
-- Location-based validation (latitude/longitude + radius)
-- Company-wide or employee-specific schedules
-
-### AI-Powered Insights
-- Late pattern detection
-- Abnormal behavior identification
-- Weekly AI-generated summaries
-- Automated alert generation
-
-### Dashboard & Reports
-- Real-time attendance overview
-- Daily statistics and KPIs
-- Attendance reports with filtering
-- Export capabilities (Excel/PDF - to be implemented)
-
-### Mobile Support
-- Progressive Web App (PWA) ready
-- Mobile-first responsive design
-- Camera integration for photo capture
-- Geolocation API support
-
-## Tech Stack
-
+### Stack Tecnológico
 - **Backend**: Laravel 10+
-- **Frontend**: Livewire v3
-- **Database**: MySQL
-- **Authentication**: Custom Laravel authentication
-- **Styling**: Tailwind CSS (via CDN)
-- **Architecture**: Service layer pattern, Policy-based authorization
+- **Autenticación**: Laravel Sanctum (API tokens)
+- **Base de Datos**: MySQL/PostgreSQL
+- **Multitenancy**: Single database, shared schema con `company_id` scoping
+- **API**: RESTful API versionada (`/api/v1`)
+- **Frontend**: PWA mobile-first (preparado para Vue 3/React)
 
-## Installation
+### Principios de Diseño
+- **API-First**: Toda la lógica expuesta vía API REST
+- **Clean Architecture**: Separación de responsabilidades (Services, Controllers, Policies)
+- **Multi-Tenant Seguro**: Scoping automático por `company_id`
+- **Escalable**: Preparado para crecimiento horizontal
 
-### Prerequisites
-- PHP 8.1 or higher
+## 📋 Características Principales
+
+### 1. Autenticación Dual
+- **Login Manual**: Email/password o PIN de 6 dígitos
+- **Login QR**: Token dinámico con TTL de 30-60 segundos
+- **Tokens Sanctum**: Con expiración y refresh
+
+### 2. Sistema de Asistencia
+- Check-in/Check-out con validaciones
+- Geolocalización opcional (radio configurable)
+- Registro de IP, dispositivo y timestamp
+- Prevención de doble fichada
+- Logs completos de todas las acciones
+
+### 3. QR Dinámico
+- Generación de QR con token temporal (TTL 45 segundos)
+- Validación server-side
+- Consumo automático del token tras uso
+- Asociado a `company_id` y ubicación
+
+### 4. Multitenancy
+- Aislamiento total de datos por empresa
+- Middleware de scoping automático
+- Validaciones a nivel de tenant
+
+### 5. Sistema de Suscripciones
+- Planes (Basic, Pro, Enterprise)
+- Límite de empleados por plan
+- Estados: trial, active, suspended, cancelled
+- Preparado para integración con Stripe
+
+### 6. Roles y Permisos
+- **Empleado**: Fichar y ver historial propio
+- **Supervisor**: Ver equipo y aprobar correcciones
+- **Admin/RRHH**: Reportes, reglas y configuración completa
+
+### 7. Correcciones de Asistencia
+- Solicitud de edición por empleados
+- Flujo de aprobación por supervisores
+- Historial completo de cambios
+
+## 🗄️ Modelos de Base de Datos
+
+### Principales
+- `companies` - Empresas (tenants)
+- `users` - Usuarios con roles
+- `plans` - Planes de suscripción
+- `subscriptions` - Suscripciones activas
+- `attendances` - Registros de asistencia
+- `attendance_logs` - Logs de todas las acciones
+- `attendance_corrections` - Solicitudes de corrección
+- `schedules` - Horarios de trabajo
+- `devices` - Dispositivos registrados
+- `alerts` - Alertas automáticas
+
+## 🚀 Instalación
+
+### Prerrequisitos
+- PHP 8.1+
 - Composer
-- MySQL 5.7+ or MariaDB 10.3+
-- Node.js and NPM (for asset compilation)
+- MySQL 5.7+ o PostgreSQL 10+
+- Node.js y NPM
 
-### Step 1: Clone and Install Dependencies
+### Pasos
 
+1. **Clonar e instalar dependencias**
 ```bash
-cd present-ia
 composer install
 npm install
 ```
 
-### Step 2: Environment Configuration
-
-Copy the `.env.example` file to `.env`:
-
+2. **Configurar entorno**
 ```bash
 cp .env.example .env
-```
-
-Generate application key:
-
-```bash
 php artisan key:generate
 ```
 
-Update your `.env` file with database credentials:
-
+3. **Configurar base de datos en `.env`**
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=present_ia
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_password
 ```
 
-### Step 3: Database Setup
-
-Run migrations:
-
+4. **Ejecutar migraciones**
 ```bash
 php artisan migrate
-```
-
-Seed the database with sample data:
-
-```bash
 php artisan db:seed
 ```
 
-This will create:
-- A demo company
-- Admin user (admin@present-ia.com / password: `password`)
-- Supervisor user (supervisor@present-ia.com / password: `password`)
-- 5 employee users (employee1@present-ia.com to employee5@present-ia.com / password: `password`)
-
-### Step 4: Storage Link
-
-Create a symbolic link for file storage:
-
+5. **Crear enlace de storage**
 ```bash
 php artisan storage:link
 ```
 
-### Step 5: Start Development Server
-
+6. **Iniciar servidor**
 ```bash
 php artisan serve
 ```
 
-The application will be available at `http://localhost:8000`
+## 📡 API Endpoints
 
-For asset compilation (if using Vite):
+### Autenticación
+
+#### Login Manual
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password",
+  "device_id": "uuid-device",
+  "device_name": "iPhone 12"
+}
+```
+
+**Respuesta:**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "user@example.com",
+    "role": "employee",
+    "company": {...}
+  },
+  "token": "1|abc123...",
+  "token_type": "Bearer"
+}
+```
+
+#### Login con PIN
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "pin": "123456",
+  "device_id": "uuid-device"
+}
+```
+
+#### Login con QR
+```http
+POST /api/v1/auth/login/qr
+Content-Type: application/json
+
+{
+  "qr_token": "token-from-qr",
+  "company_id": 1,
+  "user_id": 1
+}
+```
+
+#### Obtener Usuario Actual
+```http
+GET /api/v1/auth/me
+Authorization: Bearer {token}
+```
+
+#### Logout
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer {token}
+```
+
+### QR
+
+#### Generar QR Token (Admin)
+```http
+POST /api/v1/qr/generate
+Authorization: Bearer {token}
+```
+
+**Respuesta:**
+```json
+{
+  "qr_data": "{\"token\":\"...\",\"company_id\":1,\"expires_at\":\"...\"}",
+  "token": "abc123...",
+  "expires_at": "2025-12-18T20:45:00Z",
+  "ttl": 45
+}
+```
+
+#### Obtener QR Actual
+```http
+GET /api/v1/qr/current
+Authorization: Bearer {token}
+```
+
+#### Validar QR Token (Público)
+```http
+POST /api/v1/qr/validate
+Content-Type: application/json
+
+{
+  "token": "abc123...",
+  "company_id": 1
+}
+```
+
+### Asistencia
+
+#### Check-In
+```http
+POST /api/v1/attendance/check-in
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "latitude": -34.603722,
+  "longitude": -58.381592,
+  "photo": "base64-image-data",
+  "device_id": "uuid-device",
+  "notes": "Opcional"
+}
+```
+
+#### Check-Out
+```http
+POST /api/v1/attendance/check-out
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "latitude": -34.603722,
+  "longitude": -58.381592,
+  "photo": "base64-image-data"
+}
+```
+
+#### Asistencia de Hoy
+```http
+GET /api/v1/attendance/today
+Authorization: Bearer {token}
+```
+
+**Respuesta:**
+```json
+{
+  "attendance": {
+    "id": 1,
+    "date": "2025-12-18",
+    "check_in_at": "2025-12-18T09:00:00Z",
+    "check_out_at": null,
+    "status": "present"
+  },
+  "can_check_in": false,
+  "can_check_out": true
+}
+```
+
+#### Historial
+```http
+GET /api/v1/attendance/history?start_date=2025-12-01&end_date=2025-12-31
+Authorization: Bearer {token}
+```
+
+## 🔐 Seguridad
+
+### Multitenancy
+- Todos los queries automáticamente filtrados por `company_id`
+- Middleware `EnsureTenantScope` aplicado a todas las rutas API
+- Validación de pertenencia a tenant en cada request
+
+### Autenticación
+- Tokens Sanctum con expiración configurable
+- PINs hasheados (opcional, actualmente en texto plano - mejorar)
+- QR tokens con TTL corto (45 segundos)
+
+### Validaciones
+- Geolocalización opcional con radio configurable
+- Prevención de doble check-in/out
+- Validación de horarios según schedule
+
+## 📊 Sistema de Suscripciones
+
+### Planes
+- **Basic**: Hasta 10 empleados
+- **Pro**: Hasta 50 empleados
+- **Enterprise**: Ilimitado
+
+### Estados
+- `trial`: Período de prueba (14 días por defecto)
+- `active`: Suscripción activa
+- `suspended`: Suspendida (pago pendiente)
+- `cancelled`: Cancelada
+
+### Límites
+- Validación automática de límite de empleados
+- Bloqueo de creación de usuarios si se excede el límite
+
+## 🧪 Testing
 
 ```bash
-npm run dev
-```
-
-## Project Structure
-
-```
-present-ia/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Auth/          # Authentication controllers
-│   │   │   └── DashboardController.php
-│   ├── Livewire/              # Livewire components
-│   │   ├── CheckInOut.php
-│   │   ├── Dashboard.php
-│   │   ├── Schedules.php
-│   │   └── Reports.php
-│   ├── Models/                # Eloquent models
-│   │   ├── Company.php
-│   │   ├── User.php
-│   │   ├── EmployeeProfile.php
-│   │   ├── Attendance.php
-│   │   ├── Schedule.php
-│   │   └── Alert.php
-│   ├── Policies/              # Authorization policies
-│   │   ├── CompanyPolicy.php
-│   │   ├── AttendancePolicy.php
-│   │   ├── SchedulePolicy.php
-│   │   └── AlertPolicy.php
-│   └── Services/              # Business logic services
-│       ├── AttendanceService.php
-│       ├── AIService.php
-│       └── ScheduleService.php
-├── database/
-│   ├── migrations/            # Database migrations
-│   ├── factories/             # Model factories
-│   └── seeders/               # Database seeders
-└── resources/
-    ├── views/
-    │   ├── layouts/           # Layout templates
-    │   ├── auth/              # Authentication views
-    │   └── livewire/          # Livewire component views
-```
-
-## Database Models & Relationships
-
-### Company (Tenant)
-- Has many Users
-- Has many EmployeeProfiles
-- Has many Schedules
-- Has many Attendances
-- Has many Alerts
-
-### User
-- Belongs to Company
-- Has one EmployeeProfile
-- Has many Schedules
-- Has many Attendances
-- Has many Alerts
-- Roles: admin, supervisor, employee
-
-### Attendance
-- Belongs to Company
-- Belongs to User
-- Belongs to Schedule (optional)
-- Has many Alerts
-- Tracks: check-in/out times, photos, geolocation, device info
-
-### Schedule
-- Belongs to Company
-- Belongs to User (optional, null = company-wide)
-- Has many Attendances
-- Supports fixed and rotating shifts
-
-### Alert
-- Belongs to Company
-- Belongs to User (optional, null = company-wide)
-- Belongs to Attendance (optional)
-- Types: late_pattern, abnormal_behavior, absence, geolocation_mismatch
-
-## Usage
-
-### For Employees
-1. Log in with your credentials
-2. Navigate to "Check In/Out"
-3. Allow location access when prompted
-4. Optionally capture a photo
-5. Click "Check In" or "Check Out"
-6. View your attendance history in Reports
-
-### For Supervisors
-- All employee features
-- View schedules
-- Create/edit schedules
-- View company-wide reports
-- View alerts for your team
-
-### For Admins
-- All supervisor features
-- Full company management
-- User management
-- Company settings
-- Weekly AI summaries
-
-## API Architecture
-
-The application is built with an API-ready architecture. While the current implementation focuses on web interface via Livewire, the service layer can be easily extended to provide REST API endpoints.
-
-### Service Layer Pattern
-
-Business logic is separated into service classes:
-- `AttendanceService`: Handles check-in/check-out operations
-- `AIService`: Pattern detection and summary generation
-- `ScheduleService`: Schedule management operations
-
-### Authorization
-
-Authorization is handled through Laravel Policies:
-- `CompanyPolicy`: Company management
-- `AttendancePolicy`: Attendance viewing/editing
-- `SchedulePolicy`: Schedule management
-- `AlertPolicy`: Alert management
-
-## AI Features
-
-The AI layer (currently rule-based) provides:
-
-1. **Late Pattern Detection**: Identifies employees with frequent late arrivals
-2. **Abnormal Behavior Detection**: Flags unusual check-in times
-3. **Weekly Summaries**: Generates insights and statistics for admins
-4. **Automated Alerts**: Creates alerts based on detected patterns
-
-Future enhancements can integrate machine learning models for more advanced pattern recognition.
-
-## PWA Support
-
-The application includes PWA meta tags and is ready for Progressive Web App installation. To fully enable PWA features:
-
-1. Add a web app manifest file
-2. Implement service worker for offline support
-3. Add app icons
-
-## Development
-
-### Running Tests
-
-```bash
+# Ejecutar tests
 php artisan test
+
+# Tests específicos
+php artisan test --filter AttendanceTest
 ```
 
-### Code Style
+## 📝 Estructura del Proyecto
 
-The project uses Laravel Pint for code formatting:
-
-```bash
-./vendor/bin/pint
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/V1/          # Controllers API versionados
+│   └── Middleware/
+│       └── EnsureTenantScope.php
+├── Models/                   # Modelos Eloquent
+├── Policies/                 # Autorización
+└── Services/                 # Lógica de negocio
+    ├── AttendanceService.php
+    ├── QRService.php
+    ├── SubscriptionService.php
+    └── AIService.php
+database/
+├── migrations/               # Migraciones
+├── factories/               # Factories
+└── seeders/                 # Seeders
+routes/
+└── api.php                  # Rutas API
 ```
 
-### Database Migrations
+## 🔄 Próximos Pasos
 
-Create a new migration:
+### Pendientes
+- [ ] Sistema de correcciones completo
+- [ ] Tests unitarios y de integración
+- [ ] Exportación a Excel/CSV
+- [ ] Integración con Stripe
+- [ ] Webhooks para eventos
+- [ ] Notificaciones push
+- [ ] Dashboard web (Livewire/React)
+- [ ] PWA completo con service worker
 
-```bash
-php artisan make:migration create_example_table
-```
+### Mejoras Futuras
+- [ ] Machine Learning para detección de patrones
+- [ ] Biometría (huella dactilar, reconocimiento facial)
+- [ ] Integración con sistemas de nómina
+- [ ] App móvil nativa (React Native/Flutter)
 
-Run migrations:
+## 📄 Licencia
 
-```bash
-php artisan migrate
-```
+MIT License
 
-Rollback last migration:
+## 👥 Créditos
 
-```bash
-php artisan migrate:rollback
-```
-
-## Security Considerations
-
-- All passwords are hashed using bcrypt
-- CSRF protection enabled
-- SQL injection protection via Eloquent ORM
-- XSS protection via Blade templating
-- Role-based access control
-- Multi-tenant data isolation
-
-## Future Enhancements
-
-- [ ] Excel/PDF export implementation
-- [ ] Advanced AI/ML integration
-- [ ] Real-time notifications
-- [ ] Mobile app (React Native/Flutter)
-- [ ] Biometric authentication
-- [ ] Shift swapping functionality
-- [ ] Leave management integration
-- [ ] Payroll integration
-- [ ] Advanced reporting and analytics
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Support
-
-For issues, questions, or contributions, please open an issue on the project repository.
-
-## Credits
-
-Built with:
+Desarrollado con:
 - [Laravel](https://laravel.com)
-- [Livewire](https://livewire.laravel.com)
-- [Tailwind CSS](https://tailwindcss.com)
+- [Laravel Sanctum](https://laravel.com/docs/sanctum)
+- [Laravel Livewire](https://livewire.laravel.com)
 
 ---
 
-**Present-IA** - Intelligent Employee Attendance Management
+**Present-IA** - Sistema SaaS de Control de Asistencia B2B
