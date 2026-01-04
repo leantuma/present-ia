@@ -20,6 +20,11 @@ class EnsureTenantScope
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (Auth::check() && Auth::user()->isSuperAdmin()) {
+            // Superadmin no tiene tenant scope
+            return $next($request);
+        }
+
         if (Auth::check() && Auth::user()->company_id) {
             // Establecer el tenant actual en el request
             $request->merge(['tenant_id' => Auth::user()->company_id]);

@@ -31,7 +31,36 @@ class Dashboard extends Component
     public function loadDashboardData()
     {
         $user = Auth::user();
+        
+        // Handle superadmin case (no company)
+        if ($user->isSuperAdmin()) {
+            $this->todayStats = [
+                'total_employees' => 0,
+                'checked_in' => 0,
+                'late' => 0,
+                'absent' => 0,
+            ];
+            $this->recentAlerts = collect();
+            $this->weeklySummary = [];
+            $this->recentAttendances = collect();
+            return;
+        }
+
         $company = $user->company;
+
+        // Ensure company exists (safety check)
+        if (!$company) {
+            $this->todayStats = [
+                'total_employees' => 0,
+                'checked_in' => 0,
+                'late' => 0,
+                'absent' => 0,
+            ];
+            $this->recentAlerts = collect();
+            $this->weeklySummary = [];
+            $this->recentAttendances = collect();
+            return;
+        }
 
         // Today's stats
         $today = Carbon::today();
@@ -84,8 +113,15 @@ class Dashboard extends Component
 
     public function markAlertAsRead($alertId)
     {
+        $user = Auth::user();
+        
+        // Superadmin can't mark alerts as read (they don't belong to a company)
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+        
         $alert = Alert::find($alertId);
-        if ($alert && $alert->company_id === Auth::user()->company_id) {
+        if ($alert && $alert->company_id === $user->company_id) {
             $alert->markAsRead();
             $this->loadDashboardData();
         }

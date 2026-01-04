@@ -13,7 +13,7 @@ class CompanyPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isSuperAdmin();
     }
 
     /**
@@ -21,7 +21,7 @@ class CompanyPolicy
      */
     public function view(User $user, Company $company): bool
     {
-        return $user->company_id === $company->id;
+        return $user->isSuperAdmin() || $user->company_id === $company->id;
     }
 
     /**
@@ -29,7 +29,7 @@ class CompanyPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isSuperAdmin();
     }
 
     /**
@@ -37,7 +37,7 @@ class CompanyPolicy
      */
     public function update(User $user, Company $company): bool
     {
-        return $user->isAdmin() && $user->company_id === $company->id;
+        return $user->isSuperAdmin() || ($user->isAdmin() && $user->company_id === $company->id);
     }
 
     /**
@@ -45,7 +45,7 @@ class CompanyPolicy
      */
     public function delete(User $user, Company $company): bool
     {
-        return $user->isAdmin() && $user->company_id === $company->id;
+        return $user->isSuperAdmin() || ($user->isAdmin() && $user->company_id === $company->id);
     }
 
     /**
@@ -53,7 +53,7 @@ class CompanyPolicy
      */
     public function restore(User $user, Company $company): bool
     {
-        return $user->isAdmin() && $user->company_id === $company->id;
+        return $user->isSuperAdmin() || ($user->isAdmin() && $user->company_id === $company->id);
     }
 
     /**
@@ -61,6 +61,6 @@ class CompanyPolicy
      */
     public function forceDelete(User $user, Company $company): bool
     {
-        return $user->isAdmin() && $user->company_id === $company->id;
+        return $user->isSuperAdmin() || ($user->isAdmin() && $user->company_id === $company->id);
     }
 }
