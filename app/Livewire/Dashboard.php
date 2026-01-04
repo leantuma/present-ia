@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Attendance;
 use App\Models\Alert;
 use App\Models\Leave;
+use App\Models\Company;
+use App\Models\User;
 use App\Services\AIService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,10 @@ class Dashboard extends Component
     public $recentAttendances = [];
     public $currentWeekStart;
     public $weeklyCalendar = [];
+    
+    // Superadmin dashboard data
+    public $superadminStats = [];
+    public $companiesList = [];
 
     protected $aiService;
 
@@ -44,15 +50,7 @@ class Dashboard extends Component
         
         // Handle superadmin case (no company)
         if ($user->isSuperAdmin()) {
-            $this->todayStats = [
-                'total_employees' => 0,
-                'checked_in' => 0,
-                'late' => 0,
-                'absent' => 0,
-            ];
-            $this->recentAlerts = collect();
-            $this->weeklySummary = [];
-            $this->recentAttendances = collect();
+            $this->loadSuperadminData();
             return;
         }
 
@@ -276,6 +274,52 @@ class Dashboard extends Component
     {
         $this->currentWeekStart = Carbon::now()->startOfWeek();
         $this->loadWeeklyCalendar();
+    }
+
+    /**
+     * Load superadmin dashboard data
+     */
+    public function loadSuperadminData()
+    {
+        // Get all companies
+        $companies = Company::withCount(['users' => function ($query) {
+            $query->where('role', 'employee');
+        }])->orderBy('created_at', 'desc')->get();
+        
+        // Calculate statistics
+        $totalCompanies = $companies->count();
+        $activeCompanies = $companies->where('is_active', true)->count();
+        $inactiveCompanies = $companies->where('is_active', false)->count();
+        $totalEmployees = $companies->sum('users_count');
+        
+        $this->superadminStats = [
+            'total_companies' => $totalCompanies,
+            'active_companies' => $activeCompanies,
+            'inactive_companies' => $inactiveCompanies,
+            'total_employees' => $totalEmployees,
+        ];
+        
+        // Prepare companies list with employee count
+        $this->companiesList = $companies->map(function ($company) {
+            return [
+                'id' => $company->id,
+                'name' => $company->name,
+                'is_active' => $company->is_active,
+                'employees_count' => $company->users_count,
+                'created_at' => $company->created_at,
+            ];
+        })->toArray();
+        
+        // Set empty stats for compatibility
+        $this->todayStats = [
+            'total_employees' => 0,
+            'checked_in' => 0,
+            'late' => 0,
+            'absent' => 0,
+        ];
+        $this->recentAlerts = collect();
+        $this->weeklySummary = [];
+        $this->recentAttendances = collect();
     }
 
     public function render()

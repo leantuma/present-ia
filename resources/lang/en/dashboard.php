@@ -24,4 +24,9 @@ return [
     'exit' => 'Exit',
     'legend' => 'Legend',
     'no_employees' => 'No employees registered',
+    'total_companies' => 'Total Companies',
+    'active_companies' => 'Active Companies',
+    'inactive_companies' => 'Inactive Companies',
+    'companies_list' => 'Companies List',
+    'employees_count' => 'Employees Count',
 ];

@@ -39,14 +39,17 @@
                         <a href="{{ route('dashboard') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             {{ __('dashboard.title') }}
                         </a>
-                        <a href="{{ route('check-in') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            {{ __('attendance.check_in') }}/{{ __('attendance.check_out') }}
-                        </a>
                         @if(auth()->user()->isSuperAdmin())
                         <a href="{{ route('companies.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             {{ __('companies.title') }}
                         </a>
-                        @endif
+                        <a href="{{ route('admins.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            {{ __('admins.title') }}
+                        </a>
+                        @else
+                        <a href="{{ route('check-in') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            {{ __('attendance.check_in') }}/{{ __('attendance.check_out') }}
+                        </a>
                         @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
                         <a href="{{ route('schedules') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             {{ __('common.schedules') }}
@@ -61,6 +64,7 @@
                         <a href="{{ route('leaves.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             {{ __('leaves.title') }}
                         </a>
+                        @endif
                     </div>
                 </div>
                 <div class="flex items-center">

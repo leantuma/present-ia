@@ -24,4 +24,9 @@ return [
     'exit' => 'Salida',
     'legend' => 'Leyenda',
     'no_employees' => 'No hay empleados registrados',
+    'total_companies' => 'Total Empresas',
+    'active_companies' => 'Empresas Activas',
+    'inactive_companies' => 'Empresas Inactivas',
+    'companies_list' => 'Lista de Empresas',
+    'employees_count' => 'Cantidad de Empleados',
 ];
