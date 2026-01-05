@@ -67,8 +67,11 @@
                         @endif
                     </div>
                 </div>
-                <div class="flex items-center">
-                    <span class="text-sm text-gray-700 mr-4">{{ auth()->user()->name }}</span>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ route('profile.show') }}" class="text-sm text-gray-700 hover:text-gray-900">
+                        {{ __('profile.title') }}
+                    </a>
+                    <span class="text-sm text-gray-500">{{ auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">{{ __('auth.logout') }}</button>
