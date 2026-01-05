@@ -34,6 +34,10 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Profile routes (for all authenticated users)
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    
     // Routes not accessible to superadmin
     Route::middleware(\App\Http\Middleware\PreventSuperadminAccess::class)->group(function () {
         Route::get('/check-in', function () {
