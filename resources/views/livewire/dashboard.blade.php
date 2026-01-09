@@ -94,18 +94,38 @@
             @if(count($recentAlerts) > 0)
             <div class="space-y-3">
                 @foreach($recentAlerts as $alert)
-                <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100" wire:click="markAlertAsRead({{ $alert->id }})">
+                @php
+                    $alertUrl = null;
+                    if ($alert->type === 'leave_request' && $alert->leave_id) {
+                        $alertUrl = route('leaves.show', $alert->leave_id);
+                    } elseif ($alert->attendance_id) {
+                        // Puede agregarse ruta de attendance si existe
+                    }
+                @endphp
+                <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" 
+                     @if($alertUrl)
+                     onclick="window.location.href='{{ $alertUrl }}'"
+                     @else
+                     wire:click="markAlertAsRead({{ $alert->id }})"
+                     @endif>
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <h3 class="font-semibold text-gray-900">{{ $alert->title }}</h3>
                             <p class="text-sm text-gray-600 mt-1">{{ $alert->message }}</p>
-                            <span class="inline-block mt-2 px-2 py-1 text-xs rounded
-                                @if($alert->severity === 'high') bg-red-100 text-red-800
-                                @elseif($alert->severity === 'medium') bg-yellow-100 text-yellow-800
-                                @else bg-blue-100 text-blue-800
-                                @endif">
-                                {{ ucfirst($alert->severity) }}
-                            </span>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="inline-block px-2 py-1 text-xs rounded
+                                    @if($alert->severity === 'high') bg-red-100 text-red-800
+                                    @elseif($alert->severity === 'medium') bg-yellow-100 text-yellow-800
+                                    @else bg-blue-100 text-blue-800
+                                    @endif">
+                                    {{ ucfirst($alert->severity) }}
+                                </span>
+                                @if($alert->type === 'leave_request')
+                                <span class="inline-block px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">
+                                    {{ __('leaves.leave_request') }}
+                                </span>
+                                @endif
+                            </div>
                         </div>
                         <span class="text-xs text-gray-500">{{ $alert->created_at->diffForHumans() }}</span>
                     </div>

@@ -34,6 +34,13 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Employee dashboard route
+    Route::middleware(\App\Http\Middleware\PreventSuperadminAccess::class)->group(function () {
+        Route::get('/employee-dashboard', function () {
+            return view('employee-dashboard');
+        })->name('employee.dashboard');
+    });
+    
     // Profile routes (for all authenticated users)
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
@@ -49,6 +56,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', function () {
             return view('reports');
         })->name('reports');
+        
+        // Company settings (only for admin/supervisor)
+        Route::prefix('company')->group(function () {
+            Route::get('/settings', [\App\Http\Controllers\CompanySettingsController::class, 'show'])->name('company.settings');
+            Route::put('/settings', [\App\Http\Controllers\CompanySettingsController::class, 'update'])->name('company.settings.update');
+            Route::post('/settings/generate-qr', [\App\Http\Controllers\CompanySettingsController::class, 'generateFixedQR'])->name('company.settings.generate-qr');
+            Route::get('/settings/download-qr', [\App\Http\Controllers\CompanySettingsController::class, 'downloadFixedQR'])->name('company.settings.download-qr');
+        });
     });
     
     // Company management routes (only for superadmin)

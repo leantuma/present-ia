@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Leave;
 use App\Models\User;
+use App\Models\Alert;
 use App\Http\Requests\StoreLeaveRequest;
 use App\Http\Requests\UpdateLeaveRequest;
 use App\Http\Requests\RejectLeaveRequest;
@@ -101,6 +102,31 @@ class LeaveController extends Controller
             'approved_at' => $approvedAt,
         ]);
         
+        // Create alert for admin/supervisor when leave is pending
+        if ($status === 'pending') {
+            $employee = User::find($userId);
+            $leaveTypeLabel = $leave->getTypeLabel();
+            
+            Alert::create([
+                'company_id' => $companyId,
+                'user_id' => null, // Visible for all admin/supervisor
+                'leave_id' => $leave->id,
+                'type' => 'leave_request',
+                'title' => __('leaves.new_leave_request_alert_title'),
+                'message' => __('leaves.new_leave_request_alert_message', [
+                    'employee' => $employee->name,
+                    'type' => $leaveTypeLabel,
+                    'start_date' => $leave->start_date->format('d/m/Y'),
+                    'end_date' => $leave->end_date->format('d/m/Y'),
+                ]),
+                'severity' => 'medium',
+                'metadata' => [
+                    'leave_id' => $leave->id,
+                    'employee_id' => $employee->id,
+                ],
+            ]);
+        }
+        
         $message = $status === 'approved' 
             ? __('leaves.created_approved_successfully')
             : __('leaves.created_successfully');
@@ -183,12 +209,27 @@ class LeaveController extends Controller
      */
     public function approve(Leave $leave)
     {
-        $this->authorize('approve', $leave);
-        
         $user = auth()->user();
+        
+        // Ensure leave is loaded with company_id
+        $leave->load('company');
+        
+        // Verify authorization
+        if (!$user->isAdmin() && !$user->isSupervisor()) {
+            abort(403, __('common.access_denied'));
+        }
+        
+        if ($user->company_id !== $leave->company_id) {
+            abort(403, __('common.access_denied'));
+        }
+        
+        if (!$leave->isPending()) {
+            abort(400, __('leaves.leave_not_pending'));
+        }
+        
         $leave->approve($user);
         
-        return redirect()->route('leaves.show', $leave)
+        return redirect()->route('leaves.index')
             ->with('message', __('leaves.approved_successfully'));
     }
 

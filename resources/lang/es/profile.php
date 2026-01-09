@@ -17,3 +17,6 @@ return [
     'password_required' => 'La nueva contraseña es requerida.',
     'password_confirmation_mismatch' => 'La confirmación de contraseña no coincide.',
 ];
+
+
+

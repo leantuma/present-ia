@@ -66,27 +66,32 @@ class QRController extends Controller
     /**
      * Validar QR token (público, sin auth)
      */
-    public function validate(Request $request)
+    public function validateQR(Request $request)
     {
         $request->validate([
             'token' => 'required|string',
             'company_id' => 'required|integer',
         ]);
 
-        $company = $this->qrService->validateQRToken(
+        $result = $this->qrService->validateQRToken(
             $request->token,
             $request->company_id
         );
 
-        if (!$company) {
+        if (!$result) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Token QR inválido o expirado',
             ], 400);
         }
 
-        // Consumir el token (invalidarlo)
-        $this->qrService->consumeQRToken($company);
+        $company = $result['company'];
+        $isFixed = $result['is_fixed'];
+
+        // Solo consumir el token si NO es fijo (los tokens fijos no se invalidan)
+        if (!$isFixed) {
+            $this->qrService->consumeQRToken($company);
+        }
 
         return response()->json([
             'valid' => true,
@@ -94,6 +99,7 @@ class QRController extends Controller
                 'id' => $company->id,
                 'name' => $company->name,
             ],
+            'is_fixed' => $isFixed,
         ]);
     }
 }

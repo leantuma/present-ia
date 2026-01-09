@@ -29,4 +29,13 @@ return [
     'inactive_companies' => 'Empresas Inactivas',
     'companies_list' => 'Lista de Empresas',
     'employees_count' => 'Cantidad de Empleados',
+    'times_late' => 'Veces Tarde',
+    'times_absent' => 'Veces Ausente',
+    'days_worked' => 'Días Trabajados',
+    'this_month' => 'Este mes',
+    'day' => 'Día',
+    'scheduled_time' => 'Horario Programado',
+    'actual_time' => 'Horario Real',
+    'status' => 'Estado',
+    'no_data' => 'No hay datos disponibles',
 ];

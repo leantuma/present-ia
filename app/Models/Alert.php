@@ -13,6 +13,7 @@ class Alert extends Model
         'company_id',
         'user_id',
         'attendance_id',
+        'leave_id',
         'type',
         'title',
         'message',
@@ -50,6 +51,14 @@ class Alert extends Model
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
+    }
+
+    /**
+     * Get the leave this alert is related to
+     */
+    public function leave()
+    {
+        return $this->belongsTo(Leave::class);
     }
 
     /**
