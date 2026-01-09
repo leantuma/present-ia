@@ -270,5 +270,21 @@ class AttendanceService
                $todayAttendance->check_in_at && 
                !$todayAttendance->check_out_at;
     }
+
+    /**
+     * Validate fixed QR token for check-in
+     * This can be used to verify that the user is checking in at the correct location
+     *
+     * @param string $qrToken
+     * @param int $companyId
+     * @return bool
+     */
+    public function validateFixedQRForCheckIn(string $qrToken, int $companyId): bool
+    {
+        $qrService = app(\App\Services\QRService::class);
+        $company = $qrService->validateFixedQRToken($qrToken, $companyId);
+        
+        return $company !== null;
+    }
 }
 

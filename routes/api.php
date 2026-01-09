@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\V1\AttendanceController;
 // Public routes
 Route::prefix('v1')->group(function () {
     // QR validation (público)
-    Route::post('/qr/validate', [QRController::class, 'validate']);
+    Route::post('/qr/validate', [QRController::class, 'validateQR']);
     
     // Auth
     Route::post('/auth/login', [AuthController::class, 'login']);

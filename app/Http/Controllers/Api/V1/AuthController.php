@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -56,10 +57,11 @@ class AuthController extends Controller
 
         // Registrar/actualizar dispositivo
         if ($request->device_id) {
-            $user->devices()->updateOrCreate(
+            Device::updateOrCreate(
                 ['device_id' => $request->device_id],
                 [
                     'company_id' => $user->company_id,
+                    'user_id' => $user->id,
                     'name' => $request->device_name,
                     'platform' => $request->header('X-Platform', 'unknown'),
                     'last_seen_at' => now(),
@@ -99,6 +101,20 @@ class AuthController extends Controller
 
         // Validar QR token (se valida en QRController)
         // Aquí asumimos que ya fue validado
+
+        // Registrar/actualizar dispositivo si se proporciona
+        if ($request->device_id) {
+            Device::updateOrCreate(
+                ['device_id' => $request->device_id],
+                [
+                    'company_id' => $user->company_id,
+                    'user_id' => $user->id,
+                    'name' => $request->device_name ?? 'QR Login Device',
+                    'platform' => $request->header('X-Platform', 'unknown'),
+                    'last_seen_at' => now(),
+                ]
+            );
+        }
 
         $token = $user->createToken('qr-login')->plainTextToken;
 

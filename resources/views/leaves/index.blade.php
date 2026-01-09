@@ -83,6 +83,13 @@
                             @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
                             <a href="{{ route('leaves.edit', $leave) }}" class="text-blue-600 hover:text-blue-900">{{ __('common.edit') }}</a>
                             @endif
+                            @if($leave->isPending() && (auth()->user()->isAdmin() || auth()->user()->isSupervisor()))
+                            <form action="{{ route('leaves.approve', $leave) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('leaves.approve_confirm') }}');">
+                                @csrf
+                                <button type="submit" class="text-green-600 hover:text-green-900">{{ __('leaves.approve') }}</button>
+                            </form>
+                            <button type="button" onclick="showRejectModal({{ $leave->id }})" class="text-red-600 hover:text-red-900">{{ __('leaves.reject') }}</button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -103,4 +110,43 @@
     </div>
     @endif
 </div>
+
+@if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
+<!-- Reject Modal -->
+<div id="rejectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('leaves.reject_modal_title') }}</h3>
+            <form id="rejectForm" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">{{ __('leaves.reject_reason_required') }} <span class="text-red-500">*</span></label>
+                    <textarea name="rejection_reason" id="rejection_reason" rows="4" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideRejectModal()" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        {{ __('common.cancel') }}
+                    </button>
+                    <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                        {{ __('leaves.reject') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showRejectModal(leaveId) {
+    document.getElementById('rejectForm').action = '{{ route("leaves.reject", ":id") }}'.replace(':id', leaveId);
+    document.getElementById('rejectModal').classList.remove('hidden');
+}
+
+function hideRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+    document.getElementById('rejection_reason').value = '';
+}
+</script>
+@endif
 @endsection

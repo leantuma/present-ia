@@ -45,4 +45,9 @@ return [
     'all_statuses' => 'Todos',
     'all_types' => 'Todos',
     'from' => 'Desde',
+    'new_leave_request_alert_title' => 'Nueva Solicitud de Licencia',
+    'new_leave_request_alert_message' => ':employee ha solicitado una licencia de tipo :type del :start_date al :end_date',
+    'approve_confirm' => '¿Está seguro de aprobar esta licencia?',
+    'leave_request' => 'Solicitud de Licencia',
+    'leave_not_pending' => 'Esta licencia no está pendiente de aprobación.',
 ];

@@ -22,6 +22,7 @@ class Company extends Model
         'settings',
         'qr_token',
         'qr_token_expires_at',
+        'fixed_qr_token',
         'qr_login_enabled',
         'geolocation_required',
         'geolocation_radius_meters',

@@ -17,3 +17,6 @@ return [
     'password_required' => 'The new password is required.',
     'password_confirmation_mismatch' => 'The password confirmation does not match.',
 ];
+
+
+

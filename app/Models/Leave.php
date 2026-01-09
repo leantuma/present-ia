@@ -65,6 +65,14 @@ class Leave extends Model
     }
 
     /**
+     * Get all alerts related to this leave
+     */
+    public function alerts()
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    /**
      * Check if leave is pending
      */
     public function isPending(): bool
