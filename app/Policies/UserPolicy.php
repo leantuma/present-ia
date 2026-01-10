@@ -17,12 +17,12 @@ class UserPolicy
 
     /**
      * Determine whether the user can view the model.
-     * Admin and supervisor can view employees of their company.
+     * Admin and supervisor can view employees, admins and supervisors of their company.
      */
     public function view(User $user, User $model): bool
     {
-        // Only allow viewing employees (not admins or supervisors)
-        if ($model->role !== 'employee') {
+        // Allow viewing employees, admins and supervisors (not superadmin)
+        if ($model->role === 'superadmin') {
             return false;
         }
 
@@ -42,34 +42,58 @@ class UserPolicy
 
     /**
      * Determine whether the user can update the model.
-     * Admin and supervisor can update employees of their company.
+     * Admin can update employees, admins and supervisors of their company.
+     * Supervisor can only update employees (not change roles).
      */
     public function update(User $user, User $model): bool
     {
-        // Only allow updating employees
-        if ($model->role !== 'employee') {
+        // Must belong to the same company
+        if ($user->company_id !== $model->company_id) {
             return false;
         }
 
-        // Must belong to the same company
-        return ($user->isAdmin() || $user->isSupervisor()) 
-            && $user->company_id === $model->company_id;
+        // Supervisor can only update employees (not admins or supervisors)
+        if ($user->isSupervisor() && $model->role !== 'employee') {
+            return false;
+        }
+
+        // Admin can update employees, admins and supervisors (not superadmin)
+        if ($user->isAdmin()) {
+            return $model->role !== 'superadmin';
+        }
+
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
-     * Admin and supervisor can soft delete employees of their company.
+     * Admin can soft delete employees, admins and supervisors of their company.
+     * Supervisor can only soft delete employees.
      */
     public function delete(User $user, User $model): bool
     {
-        // Only allow deleting employees
-        if ($model->role !== 'employee') {
+        // Must belong to the same company
+        if ($user->company_id !== $model->company_id) {
             return false;
         }
 
-        // Must belong to the same company
-        return ($user->isAdmin() || $user->isSupervisor()) 
-            && $user->company_id === $model->company_id;
+        // Cannot delete superadmin
+        if ($model->role === 'superadmin') {
+            return false;
+        }
+
+        // Admin cannot delete themselves
+        if ($user->id === $model->id) {
+            return false;
+        }
+
+        // Supervisor can only delete employees
+        if ($user->isSupervisor() && $model->role !== 'employee') {
+            return false;
+        }
+
+        // Admin can delete employees, admins and supervisors
+        return $user->isAdmin() || $user->isSupervisor();
     }
 
     /**
@@ -95,5 +119,34 @@ class UserPolicy
     public function forceDelete(User $user, User $model): bool
     {
         return false;
+    }
+
+    /**
+     * Determine whether the user can change the role of a model.
+     * Only Admin can change roles.
+     */
+    public function changeRole(User $user, User $model): bool
+    {
+        // Only Admin can change roles
+        if (!$user->isAdmin()) {
+            return false;
+        }
+
+        // Must belong to the same company
+        if ($user->company_id !== $model->company_id) {
+            return false;
+        }
+
+        // Cannot change role of superadmin
+        if ($model->role === 'superadmin') {
+            return false;
+        }
+
+        // Admin cannot change their own role
+        if ($user->id === $model->id) {
+            return false;
+        }
+
+        return true;
     }
 }

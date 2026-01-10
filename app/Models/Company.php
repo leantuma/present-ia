@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Company extends Model
 {
@@ -19,6 +20,7 @@ class Company extends Model
         'logo',
         'is_active',
         'language',
+        'timezone',
         'settings',
         'qr_token',
         'qr_token_expires_at',
@@ -143,5 +145,29 @@ class Company extends Model
     public function getLanguage(): string
     {
         return $this->language ?? 'es';
+    }
+
+    /**
+     * Get the timezone for this company
+     */
+    public function getTimezone(): string
+    {
+        return $this->timezone ?? 'America/Argentina/Buenos_Aires';
+    }
+
+    /**
+     * Convert a datetime to the company's timezone
+     */
+    public function convertToCompanyTimezone(Carbon $dateTime): Carbon
+    {
+        return $dateTime->copy()->setTimezone($this->getTimezone());
+    }
+
+    /**
+     * Convert a datetime from the company's timezone to UTC
+     */
+    public function convertFromCompanyTimezone(Carbon $dateTime): Carbon
+    {
+        return $dateTime->copy()->setTimezone('UTC');
     }
 }

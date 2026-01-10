@@ -21,9 +21,11 @@ class EmployeeController extends Controller
         
         $user = auth()->user();
         
+        // Show employees, admins and supervisors (not superadmin)
         $employees = User::where('company_id', $user->company_id)
-            ->where('role', 'employee')
+            ->whereIn('role', ['employee', 'admin', 'supervisor'])
             ->with('employeeProfile')
+            ->orderBy('role')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         
@@ -101,12 +103,31 @@ class EmployeeController extends Controller
      */
     public function update(UpdateEmployeeRequest $request, User $employee)
     {
-        DB::transaction(function () use ($request, $employee) {
+        $user = auth()->user();
+        
+        // Only Admin can change roles
+        if ($request->filled('role') && $request->role !== $employee->role) {
+            if (!$user->isAdmin()) {
+                abort(403, 'Solo los administradores pueden cambiar roles.');
+            }
+            
+            // Validate role change permission
+            if (!$user->can('changeRole', $employee)) {
+                abort(403, 'No tienes permiso para cambiar el rol de este usuario.');
+            }
+        }
+        
+        DB::transaction(function () use ($request, $employee, $user) {
             // Update the user
             $updateData = [
                 'name' => $request->name,
                 'email' => $request->email,
             ];
+            
+            // Only Admin can change roles
+            if ($request->filled('role') && $user->isAdmin() && $user->can('changeRole', $employee)) {
+                $updateData['role'] = $request->role;
+            }
             
             if ($request->filled('password')) {
                 $updateData['password'] = Hash::make($request->password);
@@ -114,7 +135,7 @@ class EmployeeController extends Controller
             
             $employee->update($updateData);
 
-            // Update or create the employee profile
+            // Update or create the employee profile (maintain it even if role changes)
             $profileData = [
                 'employee_id' => $request->employee_id,
                 'department' => $request->department,

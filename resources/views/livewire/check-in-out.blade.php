@@ -18,10 +18,14 @@
         <h3 class="font-semibold text-gray-700 mb-2">Today's Attendance</h3>
         <div class="space-y-2 text-sm">
             @if($todayAttendance->check_in_at)
-            <p><span class="font-medium">Check In:</span> {{ $todayAttendance->check_in_at->format('H:i:s') }}</p>
+            @php
+                $timezoneService = app(\App\Services\TimezoneService::class);
+                $company = auth()->user()->company;
+            @endphp
+            <p><span class="font-medium">Check In:</span> {{ $timezoneService->formatForCompany($company, $todayAttendance->check_in_at, 'H:i:s') }}</p>
             @endif
             @if($todayAttendance->check_out_at)
-            <p><span class="font-medium">Check Out:</span> {{ $todayAttendance->check_out_at->format('H:i:s') }}</p>
+            <p><span class="font-medium">Check Out:</span> {{ $timezoneService->formatForCompany($company, $todayAttendance->check_out_at, 'H:i:s') }}</p>
             @endif
             <p><span class="font-medium">Status:</span> 
                 <span class="px-2 py-1 rounded text-xs 
@@ -35,6 +39,110 @@
         </div>
     </div>
     @endif
+
+    <!-- Weekly Calendar -->
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Calendario Semanal</h3>
+            <div class="flex items-center space-x-2">
+                <button wire:click="previousWeek" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                    ← Anterior
+                </button>
+                <button wire:click="goToCurrentWeek" class="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-indigo-700">
+                    Semana Actual
+                </button>
+                <button wire:click="nextWeek" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+        
+        @if(isset($weeklyCalendar['week_start']) && isset($weeklyCalendar['week_end']))
+        <p class="text-sm text-gray-600 mb-4">
+            Semana: {{ $weeklyCalendar['week_start']->format('d M') }} - {{ $weeklyCalendar['week_end']->format('d M Y') }}
+        </p>
+        @endif
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Entrada</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Salida</th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if(isset($weeklyCalendar['days']))
+                        @php
+                            $dayNames = [
+                                'monday' => 'Lunes',
+                                'tuesday' => 'Martes',
+                                'wednesday' => 'Miércoles',
+                                'thursday' => 'Jueves',
+                                'friday' => 'Viernes',
+                                'saturday' => 'Sábado',
+                                'sunday' => 'Domingo'
+                            ];
+                        @endphp
+                        @foreach(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
+                            @php
+                                $dayData = $weeklyCalendar['days'][$day] ?? null;
+                            @endphp
+                            @if($dayData)
+                            <tr class="{{ $dayData['date']->isToday() ? 'bg-blue-50' : '' }}">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $dayNames[$day] }}<br>
+                                    <span class="text-xs text-gray-500">{{ $dayData['date']->format('d/m/Y') }}</span>
+                                </td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600">
+                                    @if($dayData['check_in'])
+                                        <span class="font-semibold text-green-700">{{ $dayData['check_in'] }}</span>
+                                    @else
+                                        <span class="text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600">
+                                    @if($dayData['check_out'])
+                                        <span class="font-semibold text-red-700">{{ $dayData['check_out'] }}</span>
+                                    @else
+                                        <span class="text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    @if($dayData['status'] === 'present')
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                            Presente
+                                        </span>
+                                    @elseif($dayData['status'] === 'late')
+                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                            Tarde
+                                        </span>
+                                    @elseif($dayData['status'] === 'absent')
+                                        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                            Ausente
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                                            Sin registro
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endif
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="4" class="px-4 py-3 text-center text-sm text-gray-500">
+                                No hay datos disponibles
+                            </td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="space-y-4">
         <div>

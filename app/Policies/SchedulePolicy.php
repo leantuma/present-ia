@@ -26,19 +26,20 @@ class SchedulePolicy
 
     /**
      * Determine whether the user can create models.
+     * Only Admin can create schedules.
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isSupervisor();
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can update the model.
+     * Only Admin can update schedules.
      */
     public function update(User $user, Schedule $schedule): bool
     {
-        return ($user->isAdmin() || $user->isSupervisor()) &&
-               $user->company_id === $schedule->company_id;
+        return $user->isAdmin() && $user->company_id === $schedule->company_id;
     }
 
     /**

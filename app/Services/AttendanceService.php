@@ -7,12 +7,20 @@ use App\Models\AttendanceLog;
 use App\Models\Schedule;
 use App\Models\User;
 use App\Models\Company;
+use App\Services\TimezoneService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AttendanceService
 {
+    protected $timezoneService;
+
+    public function __construct(TimezoneService $timezoneService)
+    {
+        $this->timezoneService = $timezoneService;
+    }
+
     /**
      * Check in an employee
      *
@@ -22,7 +30,9 @@ class AttendanceService
      */
     public function checkIn(User $user, array $data): Attendance
     {
-        $today = Carbon::today();
+        $company = $user->company;
+        $companyTimezone = $this->timezoneService->getCompanyTimezone($company);
+        $today = $this->timezoneService->today($company);
         
         // Check if already checked in today
         $existingAttendance = Attendance::where('user_id', $user->id)
@@ -51,10 +61,16 @@ class AttendanceService
         if ($schedule) {
             $attendance->schedule_id = $schedule->id;
             
-            // Check if late
-            $startTime = Carbon::parse($today->format('Y-m-d') . ' ' . $schedule->start_time->format('H:i:s'));
+            // Check if late - use company timezone
+            // Build the scheduled start time in company timezone
+            $startTime = Carbon::createFromFormat(
+                'Y-m-d H:i:s',
+                $today->format('Y-m-d') . ' ' . $schedule->start_time->format('H:i:s'),
+                $companyTimezone
+            );
             $toleranceEnd = $startTime->copy()->addMinutes($schedule->tolerance_minutes);
-            $now = Carbon::now();
+            // Get current time in company timezone
+            $now = $this->timezoneService->now($company);
 
             if ($now->gt($toleranceEnd)) {
                 $attendance->status = 'late';
@@ -78,8 +94,10 @@ class AttendanceService
             $attendance->check_in_photo = $this->savePhoto($data['photo'], $user, 'check_in');
         }
 
-        // Save check-in data
-        $attendance->check_in_at = Carbon::now();
+        // Save check-in data - store in UTC
+        // Convert current time in company timezone to UTC for storage
+        $checkInTime = $this->timezoneService->now($company);
+        $attendance->check_in_at = $this->timezoneService->convertFromCompanyTimezone($company, $checkInTime);
         $attendance->check_in_latitude = $data['latitude'] ?? null;
         $attendance->check_in_longitude = $data['longitude'] ?? null;
         $attendance->check_in_device_info = json_encode($data['device_info'] ?? []);
@@ -100,10 +118,11 @@ class AttendanceService
      */
     public function checkOut(User $user, array $data): Attendance
     {
-        $today = Carbon::today();
+        $company = $user->company;
+        $today = $this->timezoneService->today($company);
         
         $attendance = Attendance::where('user_id', $user->id)
-            ->where('date', $today)
+            ->where('date', $today->format('Y-m-d'))
             ->whereNotNull('check_in_at')
             ->whereNull('check_out_at')
             ->first();
@@ -117,15 +136,19 @@ class AttendanceService
             $attendance->check_out_photo = $this->savePhoto($data['photo'], $user, 'check_out');
         }
 
-        // Calculate total minutes worked
-        $checkOutTime = Carbon::now();
-        $attendance->check_out_at = $checkOutTime;
+        // Calculate total minutes worked - use company timezone
+        $checkOutTime = $this->timezoneService->now($company);
+        // Convert to UTC for storage
+        $attendance->check_out_at = $this->timezoneService->convertFromCompanyTimezone($company, $checkOutTime);
         $attendance->check_out_latitude = $data['latitude'] ?? null;
         $attendance->check_out_longitude = $data['longitude'] ?? null;
         $attendance->check_out_device_info = json_encode($data['device_info'] ?? []);
         
         if ($attendance->check_in_at) {
-            $attendance->total_minutes_worked = $checkOutTime->diffInMinutes($attendance->check_in_at);
+            // Both times are stored in UTC, so we can calculate directly
+            $checkInUTC = Carbon::parse($attendance->check_in_at);
+            $checkOutUTC = $attendance->check_out_at;
+            $attendance->total_minutes_worked = $checkOutUTC->diffInMinutes($checkInUTC);
         }
 
         $attendance->save();
@@ -229,8 +252,10 @@ class AttendanceService
      */
     public function getTodayAttendance(User $user): ?Attendance
     {
+        $company = $user->company;
+        $today = $this->timezoneService->today($company);
         return Attendance::where('user_id', $user->id)
-            ->where('date', Carbon::today())
+            ->where('date', $today->format('Y-m-d'))
             ->first();
     }
 

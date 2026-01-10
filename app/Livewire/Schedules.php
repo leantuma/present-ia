@@ -48,6 +48,11 @@ class Schedules extends Component
 
     public function openCreateModal()
     {
+        // Only Admin can create schedules
+        if (!Auth::user()->isAdmin()) {
+            return;
+        }
+        
         $this->editingSchedule = null;
         $this->resetForm();
         $this->showModal = true;
@@ -55,6 +60,11 @@ class Schedules extends Component
 
     public function openEditModal($scheduleId)
     {
+        // Only Admin can edit schedules
+        if (!Auth::user()->isAdmin()) {
+            return;
+        }
+        
         $schedule = Schedule::find($scheduleId);
         if ($schedule && $schedule->company_id === Auth::user()->company_id) {
             $this->editingSchedule = $schedule;
@@ -77,6 +87,11 @@ class Schedules extends Component
 
     public function saveSchedule()
     {
+        // Only Admin can save schedules
+        if (!Auth::user()->isAdmin()) {
+            return;
+        }
+        
         $this->validate([
             'formData.name' => 'required|string|max:255',
             'formData.start_time' => 'required',
@@ -100,6 +115,11 @@ class Schedules extends Component
 
     public function toggleActive($scheduleId)
     {
+        // Only Admin can toggle active status
+        if (!Auth::user()->isAdmin()) {
+            return;
+        }
+        
         $schedule = Schedule::find($scheduleId);
         if ($schedule && $schedule->company_id === Auth::user()->company_id) {
             $schedule->update(['is_active' => !$schedule->is_active]);
@@ -109,6 +129,11 @@ class Schedules extends Component
 
     public function deleteSchedule($scheduleId)
     {
+        // Only Admin can delete schedules
+        if (!Auth::user()->isAdmin()) {
+            return;
+        }
+        
         $schedule = Schedule::find($scheduleId);
         if ($schedule && $schedule->company_id === Auth::user()->company_id) {
             $schedule->delete();

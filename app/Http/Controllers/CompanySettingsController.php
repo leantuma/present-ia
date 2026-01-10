@@ -42,10 +42,17 @@ class CompanySettingsController extends Controller
 
     /**
      * Update company settings
+     * Only Admin can update settings.
      */
     public function update(UpdateCompanySettingsRequest $request)
     {
         $user = Auth::user();
+        
+        // Only Admin can update settings
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Solo los administradores pueden actualizar la configuración de la empresa.');
+        }
+        
         $company = $user->company;
 
         $data = $request->validated();
@@ -58,14 +65,15 @@ class CompanySettingsController extends Controller
 
     /**
      * Generate or regenerate fixed QR token
+     * Only Admin can generate QR tokens.
      */
     public function generateFixedQR()
     {
         $user = Auth::user();
         
-        // Only admin/supervisor can generate
-        if (!$user || (!$user->isAdmin() && !$user->isSupervisor())) {
-            abort(403);
+        // Only Admin can generate
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Solo los administradores pueden generar códigos QR.');
         }
 
         $company = $user->company;
@@ -83,12 +91,13 @@ class CompanySettingsController extends Controller
 
     /**
      * Download fixed QR code as image
+     * Both Admin and Supervisor can download (read-only access).
      */
     public function downloadFixedQR()
     {
         $user = Auth::user();
         
-        // Only admin/supervisor can download
+        // Admin and Supervisor can download
         if (!$user || (!$user->isAdmin() && !$user->isSupervisor())) {
             abort(403);
         }

@@ -149,7 +149,11 @@
                             <h3 class="font-semibold text-gray-900">{{ $attendance->user->name }}</h3>
                             <p class="text-sm text-gray-600">{{ $attendance->date->format('M d, Y') }}</p>
                             @if($attendance->check_in_at)
-                            <p class="text-xs text-gray-500">In: {{ $attendance->check_in_at->format('H:i') }}</p>
+                            @php
+                                $timezoneService = app(\App\Services\TimezoneService::class);
+                                $company = auth()->user()->company;
+                            @endphp
+                            <p class="text-xs text-gray-500">In: {{ $timezoneService->formatForCompany($company, $attendance->check_in_at, 'H:i') }}</p>
                             @endif
                         </div>
                         <span class="px-2 py-1 text-xs rounded

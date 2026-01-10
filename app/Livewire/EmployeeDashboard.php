@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Attendance;
 use App\Models\Schedule;
 use App\Models\Leave;
+use App\Services\TimezoneService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,6 +15,13 @@ class EmployeeDashboard extends Component
     public $weeklyCalendar = [];
     public $monthlyStats = [];
     public $currentWeekStart;
+
+    protected $timezoneService;
+
+    public function boot(TimezoneService $timezoneService)
+    {
+        $this->timezoneService = $timezoneService;
+    }
 
     public function mount()
     {
@@ -91,6 +99,8 @@ class EmployeeDashboard extends Component
             $actualCheckIn = null;
             $actualCheckOut = null;
             
+            $company = $user->company;
+            
             if ($schedule) {
                 $scheduledStart = $schedule->start_time->format('H:i');
                 $scheduledEnd = $schedule->end_time->format('H:i');
@@ -100,8 +110,8 @@ class EmployeeDashboard extends Component
                 $status = 'on_leave';
             } elseif ($attendance) {
                 $status = $attendance->status ?? 'present';
-                $actualCheckIn = $attendance->check_in_at ? $attendance->check_in_at->format('H:i') : null;
-                $actualCheckOut = $attendance->check_out_at ? $attendance->check_out_at->format('H:i') : null;
+                $actualCheckIn = $attendance->check_in_at ? $this->timezoneService->formatForCompany($company, $attendance->check_in_at, 'H:i') : null;
+                $actualCheckOut = $attendance->check_out_at ? $this->timezoneService->formatForCompany($company, $attendance->check_out_at, 'H:i') : null;
             }
             
             $calendarDays[$dayName] = [

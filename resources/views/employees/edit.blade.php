@@ -31,6 +31,40 @@
                     @enderror
                 </div>
 
+                @if(auth()->user()->isAdmin() && auth()->user()->id !== $employee->id)
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-700">Rol <span class="text-red-500">*</span></label>
+                    <select name="role" id="role" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary @error('role') border-red-300 @enderror">
+                        <option value="employee" {{ old('role', $employee->role) === 'employee' ? 'selected' : '' }}>Empleado</option>
+                        <option value="supervisor" {{ old('role', $employee->role) === 'supervisor' ? 'selected' : '' }}>Supervisor</option>
+                        <option value="admin" {{ old('role', $employee->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Solo los administradores pueden cambiar roles.</p>
+                    @error('role')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                @else
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Rol</label>
+                    <div class="mt-1">
+                        @if($employee->role === 'admin')
+                            <span class="px-3 py-2 inline-flex text-sm font-semibold rounded-md bg-purple-100 text-purple-800">Admin</span>
+                        @elseif($employee->role === 'supervisor')
+                            <span class="px-3 py-2 inline-flex text-sm font-semibold rounded-md bg-blue-100 text-blue-800">Supervisor</span>
+                        @else
+                            <span class="px-3 py-2 inline-flex text-sm font-semibold rounded-md bg-gray-100 text-gray-800">Empleado</span>
+                        @endif
+                    </div>
+                    @if(auth()->user()->id === $employee->id)
+                        <p class="mt-1 text-sm text-gray-500">No puedes cambiar tu propio rol.</p>
+                    @else
+                        <p class="mt-1 text-sm text-gray-500">Solo los administradores pueden cambiar roles.</p>
+                    @endif
+                </div>
+                @endif
+
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">{{ __('employees.password') }}</label>
                     <input type="password" name="password" id="password" minlength="8"

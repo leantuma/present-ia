@@ -24,8 +24,9 @@ class UpdateEmployeeRequest extends FormRequest
     {
         $employee = $this->route('employee');
         $companyId = $this->user()->company_id;
+        $user = $this->user();
 
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
@@ -47,5 +48,15 @@ class UpdateEmployeeRequest extends FormRequest
             'position' => ['nullable', 'string', 'max:255'],
             'hire_date' => ['nullable', 'date'],
         ];
+
+        // Only Admin can change roles
+        if ($user->isAdmin()) {
+            $rules['role'] = [
+                'nullable',
+                Rule::in(['employee', 'admin', 'supervisor']),
+            ];
+        }
+
+        return $rules;
     }
 }
