@@ -17,9 +17,10 @@ use App\Http\Controllers\DashboardController;
 |
 */
 
+// Landing page pública
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return view('landing');
+})->name('landing');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
