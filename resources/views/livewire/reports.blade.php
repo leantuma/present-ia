@@ -75,13 +75,22 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($attendances as $attendance)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $attendance->date->format('M d, Y') }}</td>
+                    @php
+                        $meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                        $mes = $meses[$attendance->date->month - 1];
+                        $fechaFormateada = $mes . ' ' . $attendance->date->format('d, Y');
+                    @endphp
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $fechaFormateada }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $attendance->user->name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $attendance->check_in_at ? $attendance->check_in_at->format('H:i') : '-' }}
+                        @php
+                            $timezoneService = app(\App\Services\TimezoneService::class);
+                            $company = auth()->user()->company;
+                        @endphp
+                        {{ $timezoneService->formatForCompany($company, $attendance->check_in_at, 'H:i') }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $attendance->check_out_at ? $attendance->check_out_at->format('H:i') : '-' }}
+                        {{ $timezoneService->formatForCompany($company, $attendance->check_out_at, 'H:i') }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ $attendance->total_minutes_worked ? round($attendance->total_minutes_worked / 60, 2) : '-' }}h

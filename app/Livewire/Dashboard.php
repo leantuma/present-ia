@@ -8,6 +8,7 @@ use App\Models\Leave;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\AIService;
+use App\Services\TimezoneService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -26,10 +27,12 @@ class Dashboard extends Component
     public $companiesList = [];
 
     protected $aiService;
+    protected $timezoneService;
 
-    public function boot(AIService $aiService)
+    public function boot(AIService $aiService, TimezoneService $timezoneService)
     {
         $this->aiService = $aiService;
+        $this->timezoneService = $timezoneService;
     }
 
     public function mount()
@@ -226,8 +229,8 @@ class Dashboard extends Component
                     $status = 'on_leave';
                 } elseif ($attendance) {
                     $status = $attendance->status ?? 'present';
-                    $checkIn = $attendance->check_in_at ? $attendance->check_in_at->format('H:i') : null;
-                    $checkOut = $attendance->check_out_at ? $attendance->check_out_at->format('H:i') : null;
+                    $checkIn = $attendance->check_in_at ? $this->timezoneService->formatForCompany($company, $attendance->check_in_at, 'H:i') : null;
+                    $checkOut = $attendance->check_out_at ? $this->timezoneService->formatForCompany($company, $attendance->check_out_at, 'H:i') : null;
                 }
                 
                 $calendarDays[$dayName]['employees'][] = [

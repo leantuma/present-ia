@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Attendance;
+use App\Services\TimezoneService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,6 +15,13 @@ class Reports extends Component
     public $selectedUserId = null;
     public $attendances = [];
     public $summary = [];
+
+    protected $timezoneService;
+
+    public function boot(TimezoneService $timezoneService)
+    {
+        $this->timezoneService = $timezoneService;
+    }
 
     public function mount()
     {

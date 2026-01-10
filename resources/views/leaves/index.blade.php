@@ -43,7 +43,7 @@
         </form>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+    <div class="bg-white shadow-sm rounded-lg overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -55,7 +55,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('leaves.end_date') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('leaves.days') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.status') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.actions') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -77,18 +77,47 @@
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ __('leaves.pending') }}</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <a href="{{ route('leaves.show', $leave) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('common.view') }}</a>
+                    <td class="px-6 py-4 text-sm font-medium">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <a href="{{ route('leaves.show', $leave) }}" 
+                               class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md hover:bg-indigo-100 transition-colors whitespace-nowrap"
+                               title="Ver detalles">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Ver
+                            </a>
                             @if(auth()->user()->isAdmin() || auth()->user()->isSupervisor())
-                            <a href="{{ route('leaves.edit', $leave) }}" class="text-blue-600 hover:text-blue-900">{{ __('common.edit') }}</a>
+                            <a href="{{ route('leaves.edit', $leave) }}" 
+                               class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-md hover:bg-blue-100 transition-colors whitespace-nowrap"
+                               title="Editar licencia">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Editar
+                            </a>
                             @endif
                             @if($leave->isPending() && (auth()->user()->isAdmin() || auth()->user()->isSupervisor()))
                             <form action="{{ route('leaves.approve', $leave) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('leaves.approve_confirm') }}');">
                                 @csrf
-                                <button type="submit" class="text-green-600 hover:text-green-900">{{ __('leaves.approve') }}</button>
+                                <button type="submit" 
+                                        class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded-md hover:bg-green-100 transition-colors whitespace-nowrap"
+                                        title="Aprobar licencia">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Aprobar
+                                </button>
                             </form>
-                            <button type="button" onclick="showRejectModal({{ $leave->id }})" class="text-red-600 hover:text-red-900">{{ __('leaves.reject') }}</button>
+                            <button type="button" onclick="showRejectModal({{ $leave->id }})" 
+                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-md hover:bg-red-100 transition-colors whitespace-nowrap"
+                                    title="Rechazar licencia">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Rechazar
+                            </button>
                             @endif
                         </div>
                     </td>

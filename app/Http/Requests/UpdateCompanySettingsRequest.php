@@ -8,14 +8,15 @@ class UpdateCompanySettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     * Only Admin can update company settings.
      */
     public function authorize(): bool
     {
         $user = $this->user();
         $company = $user->company;
         
-        // Admin/supervisor can only update their own company
-        return $user && $company && ($user->isAdmin() || $user->isSupervisor());
+        // Only Admin can update their own company settings
+        return $user && $company && $user->isAdmin();
     }
 
     /**
@@ -31,6 +32,7 @@ class UpdateCompanySettingsRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
             'language' => ['required', 'in:es,en'],
+            'timezone' => ['required', 'string', 'in:' . implode(',', timezone_identifiers_list())],
         ];
     }
 }
